@@ -6,6 +6,6 @@ namespace BookStoreMVC.Models
 {
     class Product
     {
-        public int Id { get; set; }
+        public int Id { get; set; } // No need for [Key] attribute
     }
 }
