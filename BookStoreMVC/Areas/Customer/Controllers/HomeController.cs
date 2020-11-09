@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using BookStoreMVC.Models.ViewModels;
 using BookStoreMVC.DataAccess.Repository.IRepository;
+using BookStoreMVC.Models;
 
 namespace BookStoreMVC.Areas.Customer.Controllers
 {
@@ -24,7 +25,8 @@ namespace BookStoreMVC.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            IEnumerable<Product> products = _unitOfWork.Product.GetAll(includeProperties:"Category,CoverType");
+            return View(products);
         }
 
         public IActionResult Privacy()
