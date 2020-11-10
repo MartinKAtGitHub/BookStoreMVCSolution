@@ -29,7 +29,6 @@ namespace BookStoreMVC.Areas.Customer.Controllers
 
         public IActionResult Index()
         {
-            // I will load the Categories through a WEB API(Below) instead of here.
             return View();
         }
 
