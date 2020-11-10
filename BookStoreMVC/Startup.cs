@@ -14,6 +14,8 @@ using Microsoft.Extensions.Hosting;
 using BookStoreMVC.DataAccess.Data;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.DataAccess.Repository;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using BookStoreMVC.Utility;
 
 namespace BookStoreMVC
 {
@@ -32,9 +34,10 @@ namespace BookStoreMVC
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-
+            //services.AddDefaultIdentity<IdentityUser>() //  Comes with, if you choose to crate a project with identity
+            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
+              .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddSingleton<IEmailSender, EmailSender>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();

@@ -12,5 +12,11 @@ namespace BookStoreMVC.Utility
         public const string Proc_CoverType_GetAll = "usp_GetCoverTypes";
         public const string Proc_CoverType_Update = "usp_UpdateCoverType";
         public const string Proc_CoverType_Delete = "usp_DeleteCoverType";
+
+        public const string Role_User_Individual = "Individual Customer";
+        public const string Role_User_Company = "Company Customer";
+        public const string Role_User_Administrator = "Admin";
+        public const string Role_User_Employee = "Employee";
+
     }
 }
