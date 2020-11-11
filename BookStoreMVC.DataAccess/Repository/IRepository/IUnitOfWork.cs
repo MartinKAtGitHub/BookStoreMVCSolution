@@ -10,6 +10,9 @@ namespace BookStoreMVC.DataAccess.Repository.IRepository
         ICoverTypeRepository CoverType { get;  }
         IProductRepository Product { get; }
         ICompanyRepository Company { get; }
+        IShoppingCartRepository ShoppingCart { get; }
+        IOrderDetailsRepository OrderDetails { get; }
+        IOrderHeaderRepository OrderHeader { get; }
         IApplicationUserRepository ApplicationUser { get; }
         IStoredProcedure_Call StoredProcedure_Call { get; }
         void Save();
