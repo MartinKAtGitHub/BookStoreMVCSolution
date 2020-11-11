@@ -4,11 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.Models;
+using BookStoreMVC.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStoreMVC.Areas.Customer.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_User_Administrator)]
     public class CategoryController : Controller
     {
 

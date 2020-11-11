@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using BookStoreMVC.DataAccess.Data;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.Models;
+using BookStoreMVC.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookStoreMVC.Areas.Customer.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_User_Administrator + "," + SD.Role_User_Employee)]
     public class UserController : Controller
     {
         //private readonly IUnitOfWork _unitOfWork; // Trying to use the more direct way for testing purposes, obviously i wont do this in a real Project
@@ -35,7 +38,7 @@ namespace BookStoreMVC.Areas.Customer.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var userList = _dbContext.applicationUsers.Include(u => u.Company).ToList();
+            var userList = _dbContext.ApplicationUsers.Include(u => u.Company).ToList();
             var userRoles = _dbContext.UserRoles.ToList();
             var roles = _dbContext.Roles.ToList();
             foreach (var user in userList)
@@ -57,7 +60,7 @@ namespace BookStoreMVC.Areas.Customer.Controllers
         [HttpPost]
         public IActionResult LockUnlock([FromBody] string id)
         {
-            var objFromDb = _dbContext.applicationUsers.FirstOrDefault(u => u.Id == id);
+            var objFromDb = _dbContext.ApplicationUsers.FirstOrDefault(u => u.Id == id);
            
             if(objFromDb == null)
             {

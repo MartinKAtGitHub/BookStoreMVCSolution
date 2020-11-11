@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.Models;
 using BookStoreMVC.Models.ViewModels;
+using BookStoreMVC.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -14,6 +16,7 @@ using Microsoft.CodeAnalysis;
 namespace BookStoreMVC.Areas.Customer.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_User_Administrator + "," + SD.Role_User_Employee)]
     public class CompanyController : Controller
     {
 

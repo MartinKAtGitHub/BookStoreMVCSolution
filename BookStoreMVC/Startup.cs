@@ -35,13 +35,31 @@ namespace BookStoreMVC
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             //services.AddDefaultIdentity<IdentityUser>() //  Comes with, if you choose to crate a project with identity
-            services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders()
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultTokenProviders()
               .AddEntityFrameworkStores<ApplicationDbContext>();
+            
             services.AddSingleton<IEmailSender, EmailSender>();
+            services.Configure<EmailOptions>(Configuration.GetSection("SendGrid")); // This will map the props to the appsettings(/secrets/env_ variables) json keys, if the names match
+
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
+
+            // When using Authorization, these will be the default redirects. Not Generated, must be added manually since(3.0).
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
+            services.AddAuthentication().AddGoogle(options => {
+                options.ClientId = Configuration.GetValue<string>("GoogleCredentials:ClientId");
+                options.ClientSecret = Configuration.GetValue<string>("GoogleCredentials:ClientSecret");
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
