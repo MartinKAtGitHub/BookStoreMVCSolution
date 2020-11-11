@@ -29,6 +29,17 @@ namespace BookStoreMVC.Areas.Customer.Controllers
             return View(products);
         }
 
+        public IActionResult Details(int id)
+        {
+            var product = _unitOfWork.Product.GetFirstOrDefault(p => p.Id == id, includeProperties: "Category,CoverType");
+
+            ShoppingCart shoppingCart = new ShoppingCart()
+            {
+                ProductId = product.Id,
+                Product = product
+            };
+            return View(shoppingCart);
+        }
         public IActionResult Privacy()
         {
             return View();
