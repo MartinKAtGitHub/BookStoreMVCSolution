@@ -16,6 +16,8 @@ using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.DataAccess.Repository;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using BookStoreMVC.Utility;
+using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace BookStoreMVC
 {
@@ -60,6 +62,12 @@ namespace BookStoreMVC
                 options.ClientSecret = Configuration.GetValue<string>("GoogleCredentials:ClientSecret");
             });
 
+            services.AddSession( options => {
+
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -80,6 +88,8 @@ namespace BookStoreMVC
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthentication();
             app.UseAuthorization();

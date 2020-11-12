@@ -15,7 +15,9 @@ namespace BookStoreMVC.Models
 
         public int Id { get; set; }
 
-
+        /// <summary>
+        /// How many of the product this cart is holding.
+        /// </summary>
         [Range(1,1000, ErrorMessage ="Please enter a value between 1 and 1000")]
         public int Count { get; set; }
 

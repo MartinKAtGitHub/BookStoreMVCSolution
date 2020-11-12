@@ -153,7 +153,7 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        if(user.CompanyId > 0)
+                        if (user.CompanyId > 0)
                         {
                             await _userManager.AddToRoleAsync(user, SD.Role_User_Company);
                         }
@@ -180,7 +180,7 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                     else
                     {
                         // A regular person dose not have the ability to give them self a role so this field will be NULL
-                        if (user.Role == null) 
+                        if (user.Role == null)
                         {
                             // sign inn and redirect
                             await _signInManager.SignInAsync(user, isPersistent: false);
@@ -189,7 +189,7 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                         else
                         {
                             //Admin/Employee has assigned a role
-                            return RedirectToAction("index", "User", new { Area = "Admin"});
+                            return RedirectToAction("index", "User", new { Area = "Admin" });
                         }
 
                     }
@@ -200,6 +200,22 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                 }
             }
 
+            Input = new InputModel()
+            {
+                CompanyList = _unitOfWork.Company.GetAll()
+                .Select(i => new SelectListItem
+                {
+                    Text = i.Name,
+                    Value = i.Id.ToString()
+                }),
+
+                RoleList = _roleManager.Roles.Where(u => u.Name != SD.Role_User_Individual)
+                .Select(x => x.Name).Select(i => new SelectListItem
+                {
+                    Text = i,
+                    Value = i
+                })
+            };
             // If we got this far, something failed, redisplay form
             return Page();
         }
