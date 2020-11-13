@@ -21,7 +21,8 @@ namespace BookStoreMVC.Areas.Customer.Controllers
         private readonly IEmailSender _emailSender;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public ShoppingCartViewModel ShoppingCartVM { get; set; }
+        [BindProperty]
+        public ShoppingCartViewModel ShoppingCartViewModel { get; set; }
 
         public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, UserManager<IdentityUser> userManager)
         {
@@ -37,22 +38,22 @@ namespace BookStoreMVC.Areas.Customer.Controllers
 
             var userId = _userManager.GetUserId(User);
 
-            ShoppingCartVM = new ShoppingCartViewModel()
+            ShoppingCartViewModel = new ShoppingCartViewModel()
             {
                 //ShoppingCarts = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == claim.Value),
                 ShoppingCarts = _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId, includeProperties: "Product"),
                 OrderHeader = new OrderHeader()
             };
 
-            ShoppingCartVM.OrderHeader.OrderTotal = 0;
-            ShoppingCartVM.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+            ShoppingCartViewModel.OrderHeader.OrderTotal = 0;
+            ShoppingCartViewModel.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
                  .GetFirstOrDefault(u => u.Id == userId, includeProperties: "Company");
             //.GetFirstOrDefault(u => u.Id == claim.Value, includeProperties: "Company");
 
-            foreach (var cart in ShoppingCartVM.ShoppingCarts)
+            foreach (var cart in ShoppingCartViewModel.ShoppingCarts)
             {
                 cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
-                ShoppingCartVM.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+                ShoppingCartViewModel.OrderHeader.OrderTotal += (cart.Price * cart.Count);
 
                 cart.Product.Description = SD.ConvertToRawHtml(cart.Product.Description);
                 if (cart.Product.Description.Length > 100)
@@ -61,12 +62,13 @@ namespace BookStoreMVC.Areas.Customer.Controllers
                 }
             }
 
-            return View(ShoppingCartVM);
+            return View(ShoppingCartViewModel);
         }
 
         [HttpPost]
         [ActionName("Index")] //NOTE we have to go around the the issue of parameters. Since we cant have the same Function Name and Same Parameters we have to use this
-        public async Task<IActionResult> IndexPOST()
+        public IActionResult IndexPOST() // TODO : Implement Sending Confirmation Email - SendGrid is scummy find another provider
+        // public async Task<IActionResult> IndexPOST()
         {
             var userId = _userManager.GetUserId(User);
             var user = _unitOfWork.ApplicationUser.GetFirstOrDefault(u => u.Id == userId);
@@ -75,7 +77,7 @@ namespace BookStoreMVC.Areas.Customer.Controllers
                 ModelState.AddModelError(string.Empty, "Cant find User");
             }
 
-            // TODO : Implement Sending Confirmation Email - SendGrid is scummy find another provider
+
             //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             //var callbackUrl = Url.Page(
@@ -89,6 +91,118 @@ namespace BookStoreMVC.Areas.Customer.Controllers
 
             ModelState.AddModelError(string.Empty, "Email Confirm Not added since SENDGRID is lame");
             return RedirectToAction("Index");
+        }
+
+        public IActionResult Summary()
+        {
+            var userId = _userManager.GetUserId(User);
+
+            ShoppingCartViewModel = new ShoppingCartViewModel()
+            {
+                OrderHeader = new OrderHeader(),
+                ShoppingCarts = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == userId, includeProperties: "Product")
+            };
+
+            ShoppingCartViewModel.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                                                                    .GetFirstOrDefault(u => u.Id == userId,
+                                                                    includeProperties: "Company");
+
+            foreach (var cart in ShoppingCartViewModel.ShoppingCarts)
+            {
+                cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
+                ShoppingCartViewModel.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+            }
+
+            ShoppingCartViewModel.OrderHeader.Name = ShoppingCartViewModel.OrderHeader.ApplicationUser.Name;
+            ShoppingCartViewModel.OrderHeader.PhoneNumber = ShoppingCartViewModel.OrderHeader.ApplicationUser.PhoneNumber;
+            ShoppingCartViewModel.OrderHeader.StreetAddress = ShoppingCartViewModel.OrderHeader.ApplicationUser.StreetAddress;
+            ShoppingCartViewModel.OrderHeader.City = ShoppingCartViewModel.OrderHeader.ApplicationUser.City;
+            ShoppingCartViewModel.OrderHeader.State = ShoppingCartViewModel.OrderHeader.ApplicationUser.State;
+            ShoppingCartViewModel.OrderHeader.PostalCode = ShoppingCartViewModel.OrderHeader.ApplicationUser.PostalCode;
+
+            return View(ShoppingCartViewModel);
+        }
+        [HttpPost]
+        [ActionName("Summary")]
+        [ValidateAntiForgeryToken]
+        public IActionResult SummaryPost(/*ShoppingCartViewModel ShoppingCartViewModel*/) // We are just going to [BindProperty] the ShoppingCarViewModel
+        {
+            var userId = _userManager.GetUserId(User);
+            
+            if (ModelState.IsValid)
+            {
+                ShoppingCartViewModel.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                    .GetFirstOrDefault(u => u.Id == userId, includeProperties: "Company");
+
+                ShoppingCartViewModel.ShoppingCarts = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == userId, includeProperties: "Product");
+
+                ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.PaymentStatus_Pending;
+                ShoppingCartViewModel.OrderHeader.OrderStatus = SD.Status_Pending;
+                ShoppingCartViewModel.OrderHeader.ApplicationUserId = userId;
+                ShoppingCartViewModel.OrderHeader.OrderDate = DateTime.Now;
+
+                _unitOfWork.OrderHeader.Add(ShoppingCartViewModel.OrderHeader);
+                _unitOfWork.Save();
+
+                var orderDetails = new List<OrderDetails>();
+                foreach (var cart in ShoppingCartViewModel.ShoppingCarts)
+                {
+                    cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
+
+                    OrderDetails orderDetailObject = new OrderDetails()
+                    {
+                        ProductId = cart.ProductId,
+                        OrderId = ShoppingCartViewModel.OrderHeader.Id,
+                        Price = cart.Price,
+                        Count = cart.Count
+                    };
+
+                    ShoppingCartViewModel.OrderHeader.OrderTotal += orderDetailObject.Count * orderDetailObject.Price;
+                    _unitOfWork.OrderDetails.Add(orderDetailObject);
+
+                }
+
+                _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartViewModel.ShoppingCarts);
+                _unitOfWork.Save();
+
+                HttpContext.Session.SetObject(SD.SessionNameShoppingCart, 0);
+
+                return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartViewModel.OrderHeader.Id });
+            }
+            else
+            {
+                ShoppingCartViewModel = new ShoppingCartViewModel()
+                {
+                    OrderHeader = new OrderHeader(),
+                    ShoppingCarts = _unitOfWork.ShoppingCart.GetAll(c => c.ApplicationUserId == userId, includeProperties: "Product")
+                };
+
+                ShoppingCartViewModel.OrderHeader.ApplicationUser = _unitOfWork.ApplicationUser
+                                                                        .GetFirstOrDefault(u => u.Id == userId,
+                                                                        includeProperties: "Company");
+
+                foreach (var cart in ShoppingCartViewModel.ShoppingCarts)
+                {
+                    cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
+                    ShoppingCartViewModel.OrderHeader.OrderTotal += (cart.Price * cart.Count);
+                }
+
+                ShoppingCartViewModel.OrderHeader.Name = ShoppingCartViewModel.OrderHeader.ApplicationUser.Name;
+                ShoppingCartViewModel.OrderHeader.PhoneNumber = ShoppingCartViewModel.OrderHeader.ApplicationUser.PhoneNumber;
+                ShoppingCartViewModel.OrderHeader.StreetAddress = ShoppingCartViewModel.OrderHeader.ApplicationUser.StreetAddress;
+                ShoppingCartViewModel.OrderHeader.City = ShoppingCartViewModel.OrderHeader.ApplicationUser.City;
+                ShoppingCartViewModel.OrderHeader.State = ShoppingCartViewModel.OrderHeader.ApplicationUser.State;
+                ShoppingCartViewModel.OrderHeader.PostalCode = ShoppingCartViewModel.OrderHeader.ApplicationUser.PostalCode;
+
+                return View(ShoppingCartViewModel); // this works with [ActionName("Summary")]
+               // return RedirectToAction(nameof(Summary));
+            }
+
+        }
+
+        public IActionResult OrderConfirmation(int id)
+        {
+            return View(id);
         }
 
         public IActionResult AddProduct(int cartId)
@@ -127,6 +241,7 @@ namespace BookStoreMVC.Areas.Customer.Controllers
             return RedirectToAction(nameof(Index));
 
         }
+
         public IActionResult RemoveProduct(int cartId)
         {
             var shoppingCart = _unitOfWork.ShoppingCart.GetFirstOrDefault(c => c.Id == cartId, includeProperties: "Product");

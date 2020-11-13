@@ -18,6 +18,18 @@ namespace BookStoreMVC.Utility
         public const string Role_User_Administrator = "Admin";
         public const string Role_User_Employee = "Employee";
 
+        public const string Status_Pending = "Pending";
+        public const string Status_Approved = "Approved";
+        public const string Status_InProcess = "Processing";
+        public const string Status_Shipped = "Shipped";
+        public const string Status_Canceled = "Canceled";
+        public const string Status_Refunded = "Refunded";
+
+        public const string PaymentStatus_Pending = "Pending";
+        public const string PaymentStatus_Approved = "Approved";
+        public const string PaymentStatus_DelayedPayment = "ApprovedForDelayedPayment";
+        public const string PaymentStatus_Rejected = "Rejected";
+
         public const string SessionNameShoppingCart = "Shopping cart session";
         public static double GetPriceBasedOnQuantity(double quantity, double price, double price50, double price100)
         {

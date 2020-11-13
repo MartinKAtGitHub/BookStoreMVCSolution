@@ -120,6 +120,7 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                     CompanyId = Input.CompanyId,
                     StreetAddress = Input.StreetAddress,
                     City = Input.City,
+                    State = Input.State,
                     PostalCode = Input.PostalCode,
                     Name = Input.Name,
                     PhoneNumber = Input.PhoneNumber,
