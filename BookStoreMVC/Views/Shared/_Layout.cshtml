@@ -60,8 +60,12 @@
                             </li>
                         }
 
-                        @{ var count = HttpContextAccessor.HttpContext.Session.GetObject<int?>(SD.SessionNameShoppingCart); }
 
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="Admin" asp-controller="Order" asp-action="Index">Orders</a>
+                        </li>
+
+                        @{ var count = HttpContextAccessor.HttpContext.Session.GetObject<int?>(SD.SessionNameShoppingCart); }
                         @if (count != null)
                         {
                             <li>
