@@ -13,7 +13,6 @@ namespace BookStoreMVC.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize(Roles = SD.Role_User_Administrator)]
-
     public class CoverTypeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

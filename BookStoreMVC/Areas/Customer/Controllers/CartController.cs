@@ -144,7 +144,6 @@ namespace BookStoreMVC.Areas.Customer.Controllers
                 _unitOfWork.OrderHeader.Add(ShoppingCartViewModel.OrderHeader);
                 _unitOfWork.Save();
 
-                var orderDetails = new List<OrderDetails>();
                 foreach (var cart in ShoppingCartViewModel.ShoppingCarts)
                 {
                     cart.Price = SD.GetPriceBasedOnQuantity(cart.Count, cart.Product.Price, cart.Product.Price50, cart.Product.Price100);
@@ -161,12 +160,20 @@ namespace BookStoreMVC.Areas.Customer.Controllers
                     _unitOfWork.OrderDetails.Add(orderDetailObject);
 
                 }
-
                 _unitOfWork.ShoppingCart.RemoveRange(ShoppingCartViewModel.ShoppingCarts);
-                _unitOfWork.Save();
 
                 HttpContext.Session.SetObject(SD.SessionNameShoppingCart, 0);
 
+                /*Add payment checking here --> The payment implementation would differ from workplace to workplace so i just skipped it*/
+                //If(payment failed)
+                //ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.PaymentStatus_Rejected;
+                //Else
+                ShoppingCartViewModel.OrderHeader.PaymentStatus = SD.PaymentStatus_Approved;
+                ShoppingCartViewModel.OrderHeader.OrderStatus = SD.Status_Approved;
+                ShoppingCartViewModel.OrderHeader.PaymentDate = DateTime.Now;
+                // ---end ---
+
+                _unitOfWork.Save();
                 return RedirectToAction("OrderConfirmation", "Cart", new { id = ShoppingCartViewModel.OrderHeader.Id });
             }
             else

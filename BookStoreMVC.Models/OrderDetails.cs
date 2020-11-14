@@ -13,7 +13,9 @@ namespace BookStoreMVC.Models
         public int Count { get; set; }
         public double Price { get; set; }
         
-        
+        /// <summary>
+        /// OrderId is the order header id
+        /// </summary>
         [Required]
         public int OrderId { get; set; }
         [ForeignKey("OrderId")]

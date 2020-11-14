@@ -112,7 +112,8 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                 }
             }
 
-            // If we got this far, something failed, redisplay form
+           
+            // If we got this far, something failed, re display form
             return Page();
         }
     }
