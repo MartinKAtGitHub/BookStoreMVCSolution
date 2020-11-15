@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BookStoreMVC.DataAccess.Repository.IRepository;
 using BookStoreMVC.Models;
+using BookStoreMVC.Models.ViewModels;
 using BookStoreMVC.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,10 +23,27 @@ namespace BookStoreMVC.Areas.Customer.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(int productPage = 1)
         {
-            // I will load the Categories through a WEB API(Below) instead of here.
-            return View();
+            CategoryViewModel categoryViewModel = new CategoryViewModel()
+            {
+                Categories = _unitOfWork.Category.GetAll()
+            };
+
+            var categoriesPerPage = 2;
+            var count = categoryViewModel.Categories.Count();
+            categoryViewModel.Categories = categoryViewModel.Categories.OrderBy(p => p.Name)
+                .Skip((productPage - 1) * categoriesPerPage).Take(categoriesPerPage).ToList();
+
+            categoryViewModel.PageInfo = new PageInfo()
+            {
+                CurrentPage = productPage,
+                ItemsPerPage = 2,
+                TotalItem = count,
+                UrlParam = "/Admin/Category/Index?productPage=:" // the ':' is the character i target in my tag helper (PageLinkTagHelper) Line 37
+            };
+
+            return View(categoryViewModel);
         }
 
         public IActionResult Upsert(int? id)
