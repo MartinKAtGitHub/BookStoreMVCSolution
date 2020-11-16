@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using BookStoreMVC.Utility;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace BookStoreMVC
 {
@@ -40,10 +41,13 @@ namespace BookStoreMVC
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddDefaultTokenProviders()
               .AddEntityFrameworkStores<ApplicationDbContext>();
-            
+
+            //TODO Implement a EMail service to send emails
             services.AddSingleton<IEmailSender, EmailSender>();
             services.Configure<EmailOptions>(Configuration.GetSection("SendGrid")); // This will map the props to the appsettings(/secrets/env_ variables) json keys, if the names match
 
+            // Testing some capabilities in the Category Controller
+            services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
@@ -57,12 +61,14 @@ namespace BookStoreMVC
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
-            services.AddAuthentication().AddGoogle(options => {
+            services.AddAuthentication().AddGoogle(options =>
+            {
                 options.ClientId = Configuration.GetValue<string>("GoogleCredentials:ClientId");
                 options.ClientSecret = Configuration.GetValue<string>("GoogleCredentials:ClientSecret");
             });
 
-            services.AddSession( options => {
+            services.AddSession(options =>
+            {
 
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
                 options.Cookie.HttpOnly = true;

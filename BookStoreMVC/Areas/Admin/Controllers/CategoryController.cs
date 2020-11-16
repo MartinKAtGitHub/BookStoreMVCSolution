@@ -86,8 +86,6 @@ namespace BookStoreMVC.Areas.Customer.Controllers
 
             return View(category);
         }
-
-
         #region API CALLS
 
         [HttpGet]
@@ -103,16 +101,17 @@ namespace BookStoreMVC.Areas.Customer.Controllers
             var categoryFromDb = _unitOfWork.Category.Get(id);
             if (categoryFromDb == null)
             {
+                TempData["Error"] = "Error deleting category";
                 return Json(new { success = false, message = "Error while deleting" });
             }
             _unitOfWork.Category.Remove(categoryFromDb);
             _unitOfWork.Save();
 
+            TempData["Success"] = "Category successfully deleted";
             return Json(new { success = true, message = $"{categoryFromDb.Name} was deleted" });
 
         }
 
         #endregion
-
     }
 }
