@@ -19,6 +19,7 @@ using BookStoreMVC.Utility;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using BookStoreMVC.DataAccess.Initializer;
 
 namespace BookStoreMVC
 {
@@ -50,6 +51,8 @@ namespace BookStoreMVC
             services.AddSingleton<ITempDataProvider, CookieTempDataProvider>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IDataBaseInitializer, DataBaseInitializer>();
+
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddRazorPages();
 
@@ -77,7 +80,7 @@ namespace BookStoreMVC
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IDataBaseInitializer dataBaseInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -99,6 +102,8 @@ namespace BookStoreMVC
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            dataBaseInitializer.Initializer();
 
             app.UseEndpoints(endpoints =>
             {

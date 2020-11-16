@@ -141,22 +141,6 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Administrator))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Administrator));
-                    }
-                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Company))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Company));
-                    }
-                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Employee))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Employee));
-                    }
-                    if (!await _roleManager.RoleExistsAsync(SD.Role_User_Individual))
-                    {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Individual));
-                    }
 
                     if (user.Role == null) // If a role is not assigned make them a individual customer
                     {
