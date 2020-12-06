@@ -64,11 +64,11 @@ namespace BookStoreMVC
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
-            services.AddAuthentication().AddGoogle(options =>
-            {
-                options.ClientId = Configuration.GetValue<string>("GoogleCredentials:ClientId");
-                options.ClientSecret = Configuration.GetValue<string>("GoogleCredentials:ClientSecret");
-            });
+            //services.AddAuthentication().AddGoogle(options =>
+            //{
+            //    options.ClientId = Configuration.GetValue<string>("GoogleCredentials:ClientId");
+            //    options.ClientSecret = Configuration.GetValue<string>("GoogleCredentials:ClientSecret");
+            //});
 
             services.AddSession(options =>
             {
@@ -93,7 +93,9 @@ namespace BookStoreMVC
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            
             app.UseHttpsRedirection();
+           
             app.UseStaticFiles();
 
             app.UseRouting();
@@ -101,6 +103,7 @@ namespace BookStoreMVC
             app.UseSession();
 
             app.UseAuthentication();
+
             app.UseAuthorization();
 
             dataBaseInitializer.Initializer();
