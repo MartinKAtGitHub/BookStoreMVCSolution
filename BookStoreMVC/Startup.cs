@@ -64,6 +64,7 @@ namespace BookStoreMVC
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
 
+            // ---- GOOGLE AUTHETICATION ---
             //services.AddAuthentication().AddGoogle(options =>
             //{
             //    options.ClientId = Configuration.GetValue<string>("GoogleCredentials:ClientId");

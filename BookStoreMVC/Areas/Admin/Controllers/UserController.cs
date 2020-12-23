@@ -31,8 +31,6 @@ namespace BookStoreMVC.Areas.Customer.Controllers
             return View();
         }
 
-        
-
         #region API CALLS
 
         [HttpGet]

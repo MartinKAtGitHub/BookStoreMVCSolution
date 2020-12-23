@@ -73,15 +73,26 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
 
             [Required]
             public string Name { get; set; }
+            
+            [Display(Name = "Street address")]
             public string StreetAddress { get; set; }
+            
             public string City { get; set; }
+            
             public string State { get; set; }
+            
+            [Display(Name = "Postal Code")]
             public string PostalCode { get; set; }
+            
+            [Display(Name = "Phone Number")]
             public string PhoneNumber { get; set; }
+            
             public int? CompanyId { get; set; }
+            
             public string Role { get; set; }
 
             public IEnumerable<SelectListItem> CompanyList { get; set; }
+
             public IEnumerable<SelectListItem> RoleList { get; set; }
 
         }
@@ -136,7 +147,9 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                     PhoneNumber = Input.PhoneNumber,
                     Role = Input.Role
                 };
+                
                 var result = await _userManager.CreateAsync(user, Input.Password);
+               
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
@@ -155,7 +168,12 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                         await _userManager.AddToRoleAsync(user, user.Role);
                     }
 
-                    // TODO : Implement Sending Confirmation Email - SendGrid needs to much info
+                    /* TODO : Confirmation Email - I can implement a 3rd party E mail service to send out confirmation email.
+                     * But i feel this is something which will be different from solution to solution so i will not add one in my project.
+                     * The idea is simple. ASP.NET Core generates a reset token and a link. the link is what we send in a email. User follows the Link and the password will be reset.
+                     * How we send the Email is the problem, SendGrid is a pain and other systems are a little suspect. I have my own solution to this but it is not secure.
+                     */
+
                     //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     //var callbackUrl = Url.Page(

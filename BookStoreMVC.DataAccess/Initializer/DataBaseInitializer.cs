@@ -49,20 +49,21 @@ namespace BookStoreMVC.DataAccess.Initializer
             _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Company)).GetAwaiter().GetResult();
             _roleManager.CreateAsync(new IdentityRole(SD.Role_User_Individual)).GetAwaiter().GetResult();
 
-            // Generate a User (dose not have a role yet)
-            _userManager.CreateAsync(new ApplicationUser
-            {
-                UserName = "GeneratedAdmin",
-                Email = "GeneratedAdmin@GeneratedAdmin.com",
-                EmailConfirmed = true,
-                Name = "Martin Kay"
-            }, password:"Admin_123").GetAwaiter().GetResult(); // I would use Secrets or Env vars to populate password
 
-            ApplicationUser user = _dbContext.ApplicationUsers.Where(u => u.Email == "GeneratedAdmin@GeneratedAdmin.com").FirstOrDefault();
+            var newAdmin = new ApplicationUser
+            {
+                Email = "Admin@Admin.com",
+                EmailConfirmed = true,
+                Name = "Admin Name"
+            };
+            newAdmin.UserName = newAdmin.Email; // The system is set up to use the same thing
+
+            var result =_userManager.CreateAsync(newAdmin, "Admin_123").GetAwaiter().GetResult();
+
+            ApplicationUser user = _dbContext.ApplicationUsers.Where(u => u.Email == newAdmin.Email).FirstOrDefault();
 
             _userManager.AddToRoleAsync(user, SD.Role_User_Administrator).GetAwaiter().GetResult();
+
         }
-
-
     }
 }

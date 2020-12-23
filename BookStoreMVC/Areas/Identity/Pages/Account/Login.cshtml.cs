@@ -96,10 +96,12 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
                 }
+                
                 if (result.RequiresTwoFactor)
                 {
                     return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
+                
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
@@ -107,6 +109,12 @@ namespace BookStoreMVC.Areas.Identity.Pages.Account
                 }
                 else
                 {
+
+                    //var errors = ModelState.Select(x => x.Value.Errors)
+                    //       .Where(y => y.Count > 0)
+                    //       .ToList();
+
+
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
